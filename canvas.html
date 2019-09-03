@@ -1,0 +1,158 @@
+<html>
+	<script type='text/javascript'>
+
+		window.onload = function() {
+
+			var canvas = document.getElementById('canvas');
+			var ctx = canvas.getContext('2d');
+			var drawing = false;
+			var before_x = 0;
+			var before_y = 0;
+
+			function draw_canvas(e) {
+
+				if (!drawing){
+					return;
+				};
+				var rect = e.target.getBoundingClientRect();
+				var x = e.clientX - rect.left;
+				var y = e.clientY - rect.top;
+				ctx.lineCap = 'round';
+				ctx.strokeStyle = document.getElementById('colorSelection').value;
+				ctx.lineWidth = document.getElementById('boldSelection').value;
+				ctx.beginPath();
+				ctx.moveTo(before_x, before_y);
+				ctx.lineTo(x, y);
+				ctx.stroke();
+				ctx.closePath();
+
+				before_x = x;
+				before_y = y;
+			}
+
+			canvas.addEventListener('mousemove', draw_canvas);
+
+			canvas.addEventListener('mousedown', function(e) {
+				drawing = false;
+				var rect = e.target.getBoundingClientRect();
+				before_x = e.clientX - rect.left;
+				before_y = e.clientY - rect.top;
+				if (document.getElementById('canvasText').value == "") {
+					drawing = true;
+				} else {
+					ctx.fillStyle = document.getElementById('colorSelection').value;
+					ctx.font = 'bolder ' + (document.getElementById('boldSelection').value * 2 + 10) + ' MS ゴシック';
+					ctx.fillText(document.getElementById('canvasText').value, before_x-10, before_y);
+				}
+			});
+
+			canvas.addEventListener('mouseup', function() {
+				drawing = false;
+			});
+
+			document.getElementById('clearBtn').addEventListener('click', function() {
+			    ctx.clearRect(0,0,canvas.width,canvas.height);
+			});
+
+			document.getElementById('paintClearBtn').addEventListener('click', function() {
+				ctx.fillStyle = document.getElementById('paintColorSelection').value;
+			    ctx.fillRect(0,0,canvas.width,canvas.height);
+			});
+
+			document.getElementById('downloadBtn').addEventListener('click', function() {
+			    var blob = canvas.msToBlob();
+			    window.navigator.msSaveBlob(blob, 'downloadCanvas.png');
+			});
+
+			document.getElementById('uploadFile').addEventListener('change', function(e) {
+				var fileData = e.target.files[0];
+				var reader = new FileReader();
+				reader.onload = function() {
+					ctx.clearRect(0,0,canvas.width,canvas.height);
+					var img = new Image();
+					img.src = reader.result;
+					img.onload = function() {
+						ctx.drawImage(img, 0, 0, canvas.width,canvas.height);
+					}
+				};
+				reader.readAsDataURL(fileData);
+			});
+
+			document.getElementById('uploadFile').addEventListener('click', function(e) {
+				document.getElementById('uploadFile').value = "";
+			});
+
+		}
+
+	</script>
+	<style type="text/css">
+	<!--
+		body {
+			background-color:lemonchiffon;
+		}
+		canvas {
+			border:solid 5px;
+			background-color:white;
+		}
+		select {
+			width:60px;
+		}
+	-->
+	</style>
+	<body>
+		<div style="font-family:'MS ゴシック'">
+			Canvas：
+			<br>
+			<canvas id="canvas" width="700" height="400"></canvas>
+			<br>
+			<br>
+			色　：
+			<select id="colorSelection">
+				<option value="black">黒</option>
+				<option value="red">赤</option>
+				<option value="blue">青</option>
+				<option value="green">緑</option>
+				<option value="yellow">黄</option>
+				<option value="purple">紫</option>
+				<option value="silver">銀</option>
+				<option value="gold">金</option>
+				<option value="white">白</option>
+			</select>
+			&nbsp;&nbsp;
+			太さ：
+			<select id="boldSelection">
+				<option value="1">極細</option>
+				<option value="3">細</option>
+				<option value="5" selected="true">中</option>
+				<option value="10">太</option>
+				<option value="20">極太</option>
+			</select>
+			&nbsp;&nbsp;
+			文字：
+			<input type="text" id="canvasText" size="40" placeholder="未入力だと線引きします。"/>
+			<br/>
+			<br/>
+			<button id="clearBtn">clear</button>
+			&nbsp;&nbsp;
+			<select id="paintColorSelection" style="width:40px;">
+				<option value="black">黒</option>
+				<option value="red">赤</option>
+				<option value="blue">青</option>
+				<option value="green">緑</option>
+				<option value="yellow">黄</option>
+				<option value="purple">紫</option>
+				<option value="silver">銀</option>
+				<option value="gold">金</option>
+				<option value="white" selected="true">白</option>
+			</select>
+			<button id="paintClearBtn">色付clear</button>
+			<br/>
+			<br/>
+			<button id="downloadBtn">download</button>
+			<br/>
+			<br/>
+			upload：
+			<input type="file" id="uploadFile" size="40" accept=".jpg,.gif,.png,image/gif,image/jpeg,image/png"></input>
+		<div>
+	</body>
+</html>
